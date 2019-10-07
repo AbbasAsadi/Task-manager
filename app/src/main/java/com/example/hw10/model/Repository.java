@@ -1,5 +1,7 @@
 package com.example.hw10.model;
 
+import com.example.hw10.exception.TaskNotExistException;
+import com.example.hw10.exception.UserNotExistException;
 import com.example.hw10.green_dao.GreenDaoApplication;
 
 import java.util.List;
@@ -10,7 +12,7 @@ public class Repository {
     private UserDao mUserDao;
     private TaskDao mTaskDao;
 
-    private Repository(){
+    private Repository() {
         mDaoSession = GreenDaoApplication.getInstance().getDaoSession();
         mTaskDao = mDaoSession.getTaskDao();
         mUserDao = mDaoSession.getUserDao();
@@ -22,16 +24,23 @@ public class Repository {
         }
         return sRepository;
     }
+
     public List<User> getUserList() {
         return mUserDao.loadAll();
+    }
+    public User getUser(String userName) {
+        return mUserDao.queryBuilder()
+                .where(UserDao.Properties.MUserName.eq(userName))
+                .unique();
     }
     public Task getTask(Long id) {
         return mTaskDao.queryBuilder()
                 .where(TaskDao.Properties.UserId.eq(id))
                 .unique();
     }
+
     public List<Task> getTaskList(Long id) {
-       return mTaskDao.queryBuilder()
+        return mTaskDao.queryBuilder()
                 .where(TaskDao.Properties.UserId.eq(id))
                 .list();
     }
@@ -47,29 +56,25 @@ public class Repository {
     }*/
 
     public void insertTask(Task task) {
-       mTaskDao.insert(task);
+        mTaskDao.insert(task);
     }
-    public void insertUser(User user){
+
+    public void insertUser(User user) {
         mUserDao.insert(user);
     }
-    public void deleteUser(User user) throws Exception{
-        try {
-            mUserDao.delete(user);
-        }catch (Exception e){
-            return;
-        }
+
+    public void deleteUser(User user) throws UserNotExistException {
+        mUserDao.delete(user);
     }
-    public void deleteTask(Task task) throws Exception {
-        try {
-            mTaskDao.delete(task);
-        }catch (Exception e){
-            return;
-        }
+
+    public void deleteTask(Task task) throws TaskNotExistException {
+        mTaskDao.delete(task);
     }
-    public void deleteAllTask(Long id){
-       mTaskDao.queryBuilder()
-               .where(TaskDao.Properties.UserId.eq(id))
-               .buildDelete();
+
+    public void deleteAllTask(Long id) {
+        mTaskDao.queryBuilder()
+                .where(TaskDao.Properties.UserId.eq(id))
+                .buildDelete();
 
     }
 }
