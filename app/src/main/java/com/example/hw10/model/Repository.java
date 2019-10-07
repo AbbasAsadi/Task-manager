@@ -16,15 +16,15 @@ public class Repository {
         mDaoSession = GreenDaoApplication.getInstance().getDaoSession();
         mTaskDao = mDaoSession.getTaskDao();
         mUserDao = mDaoSession.getUserDao();
+        User user = new User();
+        user.setMUserName("admin");
+        user.setMPassword("123");
+        mUserDao.insert(user);
     }
 
     public static Repository getInstance() {
         if (sRepository == null) {
             sRepository = new Repository();
-            User user = new User();
-            user.setMUserName("admin");
-            user.setMPassword("123");
-            sRepository.insertUser(user);
         }
         return sRepository;
     }
