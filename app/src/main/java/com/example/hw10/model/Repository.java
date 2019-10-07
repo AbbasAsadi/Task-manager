@@ -21,6 +21,10 @@ public class Repository {
     public static Repository getInstance() {
         if (sRepository == null) {
             sRepository = new Repository();
+            User user = new User();
+            user.setMUserName("admin");
+            user.setMPassword("123");
+            sRepository.insertUser(user);
         }
         return sRepository;
     }
