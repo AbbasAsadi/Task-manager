@@ -1,4 +1,4 @@
-package com.example.hw10.controller;
+package com.example.hw10.controller.fragment;
 
 
 import android.os.Bundle;

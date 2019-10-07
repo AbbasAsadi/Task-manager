@@ -1,7 +1,6 @@
-package com.example.hw10.controller;
+package com.example.hw10.controller.fragment;
 
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,6 +18,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.hw10.R;
+import com.example.hw10.controller.activity.ListActivity;
+import com.example.hw10.controller.activity.SignUpActivity;
 import com.example.hw10.model.Repository;
 import com.google.android.material.button.MaterialButton;
 
@@ -52,17 +53,24 @@ public class MainFragment extends Fragment {
         logInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mEditTextUserName.getText().toString().isEmpty() || mEditTextPassword.getText().toString().isEmpty()) {
+                String userName = mEditTextUserName.getText().toString();
+                String password = mEditTextPassword.getText().toString();
+
+                if (userName.isEmpty() || password.isEmpty()) {
                     Animation shake = AnimationUtils.loadAnimation(getActivity(), R.anim.shake_animation);
                     mEditTextUserName.startAnimation(shake);
                     mEditTextPassword.startAnimation(shake);
                     Toast.makeText(getActivity(), "UserName and Password should be fill", Toast.LENGTH_SHORT).show();
-                } else if (mRepository.getUser(mEditTextUserName.getText().toString()) == null) {
+                } else if (mRepository.getUser(userName) == null) {
                     Toast.makeText(getActivity(), "this user not found", Toast.LENGTH_SHORT).show();
-                } else {
-                    Intent intent = new Intent(getActivity(), ListActivity.class);
-                    intent.putExtra(USER_ID, mRepository.getUser(mEditTextUserName.getText().toString().trim()).getMId());
-                    startActivity(intent);
+                } else if (!(mRepository.getUser(userName).getMUserName().equals(userName) &&
+                        mRepository.getUser(userName).getMPassword().equals(password))) {
+                    Toast.makeText(getActivity(), "user name and password not match", Toast.LENGTH_LONG).show();
+                } else if (mRepository.getUser(userName).getMUserName().equals(userName) &&
+                        mRepository.getUser(userName).getMPassword().equals(password)) {
+                    startActivity(ListActivity.newIntent(getActivity(), mRepository.getUser(userName).getMId()));
+                }else {
+                    Toast.makeText(getActivity(), "something's wrong", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -84,7 +92,7 @@ public class MainFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        startActivity(new Intent(getActivity(), SignUpActivity.class));
+        startActivity(SignUpActivity.newIntent(getActivity()));
         return super.onOptionsItemSelected(item);
     }
 

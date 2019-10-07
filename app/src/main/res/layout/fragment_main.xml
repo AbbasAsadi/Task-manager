@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_main"
     android:layoutDirection="ltr"
-    tools:context=".controller.MainFragment">
+    tools:context=".controller.fragment.MainFragment">
 
     <EditText
         android:id="@+id/user_name_edit_text"

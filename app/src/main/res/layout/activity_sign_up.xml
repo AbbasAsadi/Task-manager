@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layoutDirection="ltr"
     android:orientation="vertical"
-    tools:context=".controller.SignUpActivity">
+    tools:context=".controller.activity.SignUpActivity">
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
