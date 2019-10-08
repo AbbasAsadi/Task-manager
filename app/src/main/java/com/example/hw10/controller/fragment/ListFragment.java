@@ -1,12 +1,17 @@
 package com.example.hw10.controller.fragment;
 
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,6 +30,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hw10.R;
+import com.example.hw10.controller.activity.MainActivity;
 import com.example.hw10.exception.TaskNotExistException;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
@@ -63,6 +69,7 @@ public class ListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mRepository = Repository.getInstance();
         getExtras();
         showSubtitle();
@@ -219,6 +226,45 @@ public class ListFragment extends Fragment {
             mTaskAdapter.notifyDataSetChanged();
         }
     }
+
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_list_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sign_out_menu_item:
+                startActivity(new Intent(getActivity(), MainActivity.class));
+                break;
+            case R.id.delete_all_task_menu_item:
+                final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();
+                dialog.setMessage("Do you want to delete all Tasks?");
+                dialog.setButton(Dialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Repository.getInstance().deleteAllTask(userId);
+                        mTaskAdapter = null;
+                        updateUi();
+                        mRecyclerViewTask.setVisibility(View.GONE);
+                        emptyListIcon.setVisibility(View.VISIBLE);
+                        dialog.dismiss();
+                    }
+                });
+                dialog.setButton(Dialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     public class TaskHolder extends RecyclerView.ViewHolder implements RadioGroup.OnCheckedChangeListener {
         private TextView mTextViewName;
