@@ -16,10 +16,10 @@ public class Repository {
         mDaoSession = GreenDaoApplication.getInstance().getDaoSession();
         mTaskDao = mDaoSession.getTaskDao();
         mUserDao = mDaoSession.getUserDao();
-        User user = new User();
+        /*User user = new User();
         user.setMUserName("admin");
         user.setMPassword("123");
-        mUserDao.insert(user);
+        mUserDao.insert(user);*/
     }
 
     public static Repository getInstance() {
@@ -37,10 +37,16 @@ public class Repository {
                 .where(UserDao.Properties.MUserName.eq(userName))
                 .unique();
     }
+    public User getUser(Long id) {
+        return mUserDao.queryBuilder()
+                .where(UserDao.Properties.MId.eq(id))
+                .unique();
+    }
     public Task getTask(Long id) {
         return mTaskDao.queryBuilder()
                 .where(TaskDao.Properties.UserId.eq(id))
                 .unique();
+
     }
 
     public List<Task> getTaskList(Long id) {
@@ -80,5 +86,9 @@ public class Repository {
                 .where(TaskDao.Properties.UserId.eq(id))
                 .buildDelete();
 
+    }
+
+    public void updateTask(Task task) throws TaskNotExistException{
+        mTaskDao.update(task);
     }
 }
