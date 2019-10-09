@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -279,20 +280,23 @@ public class ListFragment extends Fragment {
         private ImageView deleteIcon;
         private View tempView;
         private String nameTask;
-
+        private final AlertDialog editTaskDialog = new AlertDialog.Builder(getActivity()).create();
 
         public TaskHolder(@NonNull final View itemView) {
             super(itemView);
             initUi(itemView);
 
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
                     //Log.d("lastPosition", lastPosition + "");
                     lastPosition = getAdapterPosition();
                     // Log.d("lastPosition", lastPosition + "");
                     showEditTaskDialog();
                     //updateUi();
+
 
 
                 }
@@ -308,7 +312,7 @@ public class ListFragment extends Fragment {
         }
 
         private void showEditTaskDialog() {
-            final AlertDialog editTaskDialog = new AlertDialog.Builder(getActivity()).create();
+            //final AlertDialog editTaskDialog = new AlertDialog(getActivity());
             editTaskDialog.setView(tempView);
             initUiEditTaskDialog();
             initDefaultValue();
@@ -323,8 +327,10 @@ public class ListFragment extends Fragment {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            initTaskName();
-                            initTaskState();
+                            Long id = mRepository.getTaskList(userId).get(lastPosition).getMId();
+                            Task task = mRepository.getTask(id);
+                            initTaskName(task);
+                            initTaskState(task);
 
 
                           /*  try {
@@ -369,26 +375,47 @@ public class ListFragment extends Fragment {
             }
         }
 
-        private void initTaskName() {
-            nameTask = mEditTextNameDialog.getText().toString().trim();
+        private void initTaskName(Task task) {
+            nameTask = mEditTextNameDialog.getText().toString();
             if (!nameTask.isEmpty()){
-                mRepository.getTaskList(userId).get(lastPosition).setMName(nameTask);
+                try {
+                    task.setMName(nameTask);
+                    mRepository.updateTask(task);
+                } catch (TaskNotExistException e) {
+                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+
             }
 
         }
 
-        private void initTaskState() {
+        private void initTaskState(Task task) {
             if (mRadioGroup.getCheckedRadioButtonId() != -1) {
                 int radioButtonId = mRadioGroup.getCheckedRadioButtonId();
                 switch (radioButtonId) {
                     case R.id.todo_radio_button:
-                        mRepository.getTaskList(userId).get(lastPosition).setMState(State.TODO);
+                        task.setMState(State.TODO);
+                        try {
+                            mRepository.updateTask(task);
+                        } catch (TaskNotExistException e) {
+                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                         break;
                     case R.id.doing_radio_button:
-                        mRepository.getTaskList(userId).get(lastPosition).setMState(State.DOING);
+                        task.setMState(State.DOING);
+                        try {
+                            mRepository.updateTask(task);
+                        } catch (TaskNotExistException e) {
+                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                         break;
                     case R.id.done_radio_button:
-                        mRepository.getTaskList(userId).get(lastPosition).setMState(State.DONE);
+                       task.setMState(State.DONE);
+                        try {
+                            mRepository.updateTask(task);
+                        } catch (TaskNotExistException e) {
+                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                         break;
                 }
             }
@@ -417,6 +444,7 @@ public class ListFragment extends Fragment {
         private void deleteRow() {
             Long id = mRepository.getTaskList(userId).get(lastPosition).getMId();
             Task deleteTask = mRepository.getTask(id);
+            Log.e("TAG4" , deleteTask.getMUser().getMUserName());
             try {
                 mRepository.deleteTask(deleteTask);
                 mTaskAdapter.setTasks(mRepository.getTaskList(userId));
@@ -485,7 +513,6 @@ public class ListFragment extends Fragment {
 
             handleMaterialLetterIcon(holder, position);
             holder.bindTasks(mTasks.get(position));
-
         }
 
         private void handleMaterialLetterIcon(@NonNull TaskHolder holder, int position) {

@@ -44,7 +44,7 @@ public class Repository {
     }
     public Task getTask(Long id) {
         return mTaskDao.queryBuilder()
-                .where(TaskDao.Properties.UserId.eq(id))
+                .where(TaskDao.Properties.MId.eq(id))
                 .unique();
 
     }
@@ -54,6 +54,9 @@ public class Repository {
                 .where(TaskDao.Properties.UserId.eq(id))
                 .list();
     }
+
+
+
 /*    public int getPosition(UUID uuid) {
 //        return mCrimes.indexOf(getCrime(uuid));
         List<Task> tasks = getTaskList();
@@ -84,7 +87,8 @@ public class Repository {
     public void deleteAllTask(Long id) {
         mTaskDao.queryBuilder()
                 .where(TaskDao.Properties.UserId.eq(id))
-                .buildDelete();
+                .buildDelete()
+                .executeDeleteWithoutDetachingEntities();
 
     }
 
