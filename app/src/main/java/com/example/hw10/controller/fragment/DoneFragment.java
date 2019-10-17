@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
@@ -28,7 +27,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import com.example.hw10.R;
 import com.example.hw10.controller.activity.MainActivity;
@@ -38,40 +36,37 @@ import com.example.hw10.model.State;
 import com.example.hw10.model.Task;
 import com.github.ivbaranov.mli.MaterialLetterIcon;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListFragment extends Fragment {
+public class DoneFragment extends Fragment {
     public static final String USER_ID = "userId";
-    public static final String TAG = "ListFragment";
-    public static final String TAB_NUMBER = "tabNumber";
+    private static final String TAG = "doneFragment";
 
     private Long userId;
     private int lastPosition;
 
     private ImageView emptyListIcon;
     private RecyclerView mRecyclerViewTask;
-    private TaskAdapter mTaskAdapter;
+    private DoneFragment.TaskAdapter mTaskAdapter;
     private List<Task> mTaskList;
     private Repository mRepository;
 
-    public static ListFragment newInstance(Long userId) {
-
-        Bundle args = new Bundle();
-        args.putLong(USER_ID , userId);
-        ListFragment fragment = new ListFragment();
-        fragment.setArguments(args);
-        return fragment;
+    public DoneFragment() {
+        // Required empty public constructor
     }
 
-    public ListFragment() {
-        // Required empty public constructor
+    public static DoneFragment newInstance(Long userId) {
+
+        Bundle args = new Bundle();
+        args.putLong(USER_ID, userId);
+        DoneFragment fragment = new DoneFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -80,10 +75,10 @@ public class ListFragment extends Fragment {
         setHasOptionsMenu(true);
         mRepository = Repository.getInstance();
         userId = getArguments().getLong(USER_ID);
-        Log.e("TAG1" , "in listFragment userId:#" + userId);
+        Log.e("TAG1", "in listFragment userId:#" + userId);
 
         showSubtitle();
-        mTaskList = mRepository.getTaskList(userId);
+        mTaskList = mRepository.getTaskList(userId, State.DONE);
     }
 
     private void showSubtitle() {
@@ -93,23 +88,15 @@ public class ListFragment extends Fragment {
 
     }
 
-    private void getExtras() {
-        Bundle args = getArguments();
-        if (args != null) {
-            userId = args.getLong(USER_ID);
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_done, container, false);
         initUi(view);
         updateUi();
         return view;
     }
-
     private void initUi(View view) {
         emptyListIcon = view.findViewById(R.id.empty_list_icon);
         mRecyclerViewTask = view.findViewById(R.id.recycler_view);
@@ -117,34 +104,18 @@ public class ListFragment extends Fragment {
 
     }
 
-
-
-
-  /*  private void startFragment() {
-        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_add_task);
-        if (fragment == null) {
-            fragmentManager
-                    .beginTransaction()
-                    .replace(R.id.dialog_layout, new AddTaskFragment())
-                    .addToBackStack(null)
-                    .commit();
-        }
-    }*/
-
-
     @Override
     public void onResume() {
         super.onResume();
-        mTaskAdapter.setTasks(mRepository.getTaskList(userId));
+        mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DONE));
         mTaskAdapter.notifyDataSetChanged();
     }
 
     private void updateUi() {
-        mTaskList = mRepository.getTaskList(userId);
+        mTaskList = mRepository.getTaskList(userId, State.DONE);
         if (mTaskAdapter == null) {
             Log.e(TAG, "Task Adapter is null");
-            mTaskAdapter = new TaskAdapter(getActivity(), mTaskList);
+            mTaskAdapter = new DoneFragment.TaskAdapter(getActivity(), mTaskList);
             mRecyclerViewTask.setAdapter(mTaskAdapter);
             if (mTaskList.size() != 0) {
                 emptyListIcon.setVisibility(View.GONE);
@@ -156,7 +127,6 @@ public class ListFragment extends Fragment {
             mTaskAdapter.notifyDataSetChanged();
         }
     }
-
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
@@ -195,7 +165,6 @@ public class ListFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-
     public class TaskHolder extends RecyclerView.ViewHolder implements RadioGroup.OnCheckedChangeListener {
         private final AlertDialog editTaskDialog = new AlertDialog.Builder(getActivity()).create();
         private TextView mTextViewName;
@@ -207,7 +176,7 @@ public class ListFragment extends Fragment {
         private MaterialButton setDate;
         private MaterialButton setTime;
         private ImageView deleteIcon;
-        private View tempView;
+       // private View tempView;
         private String nameTask;
 
         public TaskHolder(@NonNull final View itemView) {
@@ -222,7 +191,7 @@ public class ListFragment extends Fragment {
                     //Log.d("lastPosition", lastPosition + "");
                     lastPosition = getAdapterPosition();
                     // Log.d("lastPosition", lastPosition + "");
-                   // showEditTaskDialog();
+                    //showEditTaskDialog();
                     //updateUi();
 
 
@@ -230,9 +199,9 @@ public class ListFragment extends Fragment {
             });
 
         }
-
-       /* private void initUi(@NonNull View itemView) {
-            //tempView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_layout, null);
+/*
+        private void initUi(@NonNull View itemView) {
+            tempView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_layout, null);
             mTextViewName = itemView.findViewById(R.id.name_item_task);
             mTextViewDate = itemView.findViewById(R.id.date_item_task);
             mMaterialLetterIcon = itemView.findViewById(R.id.icon_item_task);
@@ -254,7 +223,7 @@ public class ListFragment extends Fragment {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            Long id = mRepository.getTaskList(userId).get(lastPosition).getMId();
+                            Long id = mRepository.getTaskList(userId, State.DONE).get(lastPosition).getMId();
                             Task task = mRepository.getTask(id);
                             initTaskName(task);
                             initTaskState(task);
@@ -267,7 +236,7 @@ public class ListFragment extends Fragment {
                             }*//*
                             Log.e(TAG, "last position is ##" + lastPosition);
                             mTaskAdapter.notifyItemChanged(lastPosition);
-                            mTaskAdapter.setTasks(mRepository.getTaskList(userId));
+                            mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DONE));
                             editTaskDialog.dismiss();
                         }
                     });
@@ -285,13 +254,13 @@ public class ListFragment extends Fragment {
         }
 
         private void initDefaultValue() {
-            Task tempTask = mRepository.getTaskList(userId).get(lastPosition);
+            Task tempTask = mRepository.getTaskList(userId, State.DONE).get(lastPosition);
             mEditTextNameDialog.setText(tempTask.getMName());
             mEditTextDescription.setText(tempTask.getMDescription());
             setDate.setText(tempTask.getMDate().toString());
             //setTime.setText((int) tempTask.getTime());
             State state = tempTask.getMState();
-            if (state == State.TODO) {
+            if (state == State.DOING) {
                 mRadioGroup.check(R.id.todo_radio_button);
 
             } else if (state == State.DOING) {
@@ -369,14 +338,14 @@ public class ListFragment extends Fragment {
         }
 
         private void deleteRow() {
-            Long id = mRepository.getTaskList(userId).get(lastPosition).getMId();
+            Long id = mRepository.getTaskList(userId, State.DONE).get(lastPosition).getMId();
             Task deleteTask = mRepository.getTask(id);
             Log.e("TAG4", deleteTask.getMUser().getMUserName());
             try {
                 mRepository.deleteTask(deleteTask);
-                mTaskAdapter.setTasks(mRepository.getTaskList(userId));
+                mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DONE));
                 mTaskAdapter.notifyDataSetChanged();
-                if (mRepository.getTaskList(userId).size() == 0) {
+                if (mRepository.getTaskList(userId, State.DONE).size() == 0) {
                     emptyListIcon.setVisibility(View.VISIBLE);
                     mRecyclerViewTask.setVisibility(View.GONE);
                 }
@@ -394,13 +363,13 @@ public class ListFragment extends Fragment {
         public void onCheckedChanged(RadioGroup radioGroup, int id) {
             switch (radioGroup.getCheckedRadioButtonId()) {
                 case R.id.todo_radio_button:
-                    mRepository.getTaskList(userId).get(lastPosition).setMState(State.TODO);
+                    mRepository.getTaskList(userId, State.DONE).get(lastPosition).setMState(State.TODO);
                     break;
                 case R.id.doing_radio_button:
-                    mRepository.getTaskList(userId).get(lastPosition).setMState(State.DOING);
+                    mRepository.getTaskList(userId, State.DONE).get(lastPosition).setMState(State.DOING);
                     break;
                 case R.id.done_radio_button:
-                    mRepository.getTaskList(userId).get(lastPosition).setMState(State.DONE);
+                    mRepository.getTaskList(userId, State.DONE).get(lastPosition).setMState(State.DONE);
                     break;
             }
 
@@ -408,7 +377,7 @@ public class ListFragment extends Fragment {
     }
 
 
-    public class TaskAdapter extends RecyclerView.Adapter<TaskHolder> {
+    public class TaskAdapter extends RecyclerView.Adapter<DoneFragment.TaskHolder> {
         private List<Task> mTasks;
         private int[] mMaterialColors;
         private Context mContext;
@@ -425,13 +394,13 @@ public class ListFragment extends Fragment {
 
         @NonNull
         @Override
-        public TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new TaskHolder(LayoutInflater.from(mContext)
+        public DoneFragment.TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new DoneFragment.TaskHolder(LayoutInflater.from(mContext)
                     .inflate(R.layout.list_item_task, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(@NonNull TaskHolder holder, int position) {
+        public void onBindViewHolder(@NonNull DoneFragment.TaskHolder holder, int position) {
             Log.e(TAG, "position#" + position);
             if (position % 2 == 0)
                 holder.itemView.setBackgroundColor(Color.rgb(145, 196, 153));
@@ -442,7 +411,7 @@ public class ListFragment extends Fragment {
             holder.bindTasks(mTasks.get(position));
         }
 
-        private void handleMaterialLetterIcon(@NonNull TaskHolder holder, int position) {
+        private void handleMaterialLetterIcon(@NonNull DoneFragment.TaskHolder holder, int position) {
             holder.mMaterialLetterIcon.setInitials(true);
             holder.mMaterialLetterIcon.setInitialsNumber(1);
             holder.mMaterialLetterIcon.setLetterSize(20);
@@ -455,4 +424,4 @@ public class ListFragment extends Fragment {
             return mTasks.size();
         }
     }
-}//end class
+}

@@ -1,21 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".controller.fragment.ListFragment">
-
-
-<!--    <androidx.viewpager.widget.PagerTitleStrip
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="#008080"
-        android:paddingBottom="4dp"
-        android:paddingTop="4dp"
-        android:textColor="#FFFFFF"/>-->
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".controller.fragment.DoingFragment">
 
     <ImageView
         android:id="@+id/empty_list_icon"
@@ -38,7 +27,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -32,16 +32,19 @@ public class Repository {
     public List<User> getUserList() {
         return mUserDao.loadAll();
     }
+
     public User getUser(String userName) {
         return mUserDao.queryBuilder()
                 .where(UserDao.Properties.MUserName.eq(userName))
                 .unique();
     }
+
     public User getUser(Long id) {
         return mUserDao.queryBuilder()
                 .where(UserDao.Properties.MId.eq(id))
                 .unique();
     }
+
     public Task getTask(Long id) {
         return mTaskDao.queryBuilder()
                 .where(TaskDao.Properties.MId.eq(id))
@@ -55,7 +58,12 @@ public class Repository {
                 .list();
     }
 
-
+    public List<Task> getTaskList(Long id, State state) {
+        return mTaskDao.queryBuilder()
+                .where(TaskDao.Properties.UserId.eq(id))
+                .where(TaskDao.Properties.MState.eq(state))
+                .list();
+    }
 
 /*    public int getPosition(UUID uuid) {
 //        return mCrimes.indexOf(getCrime(uuid));
@@ -92,7 +100,7 @@ public class Repository {
 
     }
 
-    public void updateTask(Task task) throws TaskNotExistException{
+    public void updateTask(Task task) throws TaskNotExistException {
         mTaskDao.update(task);
     }
 }

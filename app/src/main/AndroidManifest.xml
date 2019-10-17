@@ -13,7 +13,7 @@
         <activity android:name=".controller.activity.SignUpActivity"></activity>
         <activity android:name=".controller.activity.ListActivity"></activity>
         <activity android:name=".controller.activity.MainActivity">
-            <intent-filter>
+        <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
