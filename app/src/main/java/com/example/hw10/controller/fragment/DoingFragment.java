@@ -30,9 +30,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hw10.R;
 import com.example.hw10.controller.activity.MainActivity;
-import com.example.hw10.exception.TaskNotExistException;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
+import com.example.hw10.model.StateConverter;
 import com.example.hw10.model.Task;
 import com.github.ivbaranov.mli.MaterialLetterIcon;
 import com.google.android.material.button.MaterialButton;
@@ -46,7 +46,7 @@ import java.util.Random;
 public class DoingFragment extends Fragment {
     public static final String USER_ID = "userId";
     private static final String TAG = "doingFragment";
-
+    private static int stateValue;
     private Long userId;
     private int lastPosition;
 
@@ -55,6 +55,7 @@ public class DoingFragment extends Fragment {
     private DoingFragment.TaskAdapter mTaskAdapter;
     private List<Task> mTaskList;
     private Repository mRepository;
+    private StateConverter mStateConverter;
 
     public DoingFragment() {
         // Required empty public constructor
@@ -78,7 +79,9 @@ public class DoingFragment extends Fragment {
         Log.e("TAG1", "in listFragment userId:#" + userId);
 
         showSubtitle();
-        mTaskList = mRepository.getTaskList(userId, State.DOING);
+        mStateConverter = new StateConverter();
+        stateValue = mStateConverter.convertToDatabaseValue(State.DOING);
+        mTaskList = mRepository.getTaskList(userId, stateValue);
     }
 
     private void showSubtitle() {
@@ -94,6 +97,7 @@ public class DoingFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_doing, container, false);
         initUi(view);
+        Log.e("where am I", "onCreateView");
         updateUi();
         return view;
     }
@@ -108,12 +112,15 @@ public class DoingFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DOING));
+        Log.e("where am I", "onResume");
+        updateUi();
+        mTaskAdapter.setTasks(mRepository.getTaskList(userId, stateValue));
+        mRecyclerViewTask.setAdapter(mTaskAdapter);
         mTaskAdapter.notifyDataSetChanged();
     }
 
     private void updateUi() {
-        mTaskList = mRepository.getTaskList(userId, State.DOING);
+        mTaskList = mRepository.getTaskList(userId, stateValue);
         if (mTaskAdapter == null) {
             Log.e(TAG, "Task Adapter is null");
             mTaskAdapter = new TaskAdapter(getActivity(), mTaskList);
@@ -149,6 +156,7 @@ public class DoingFragment extends Fragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Repository.getInstance().deleteAllTask(userId);
                         mTaskAdapter = null;
+                        Log.e("where am I", "delete_all_task_menu_item");
                         updateUi();
                         mRecyclerViewTask.setVisibility(View.GONE);
                         emptyListIcon.setVisibility(View.VISIBLE);
@@ -208,29 +216,29 @@ public class DoingFragment extends Fragment {
             mMaterialLetterIcon = itemView.findViewById(R.id.icon_item_task);
         }
 
-       /* private void showEditTaskDialog() {
-            //final AlertDialog editTaskDialog = new AlertDialog(getActivity());
-            editTaskDialog.setView(tempView);
-            initUiEditTaskDialog();
-            initDefaultValue();
-            deleteIcon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showDeleteTaskDialog();
-                    editTaskDialog.dismiss();
-                }
-            });
-            editTaskDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            Long id = mRepository.getTaskList(userId, State.DOING).get(lastPosition).getMId();
-                            Task task = mRepository.getTask(id);
-                            initTaskName(task);
-                            initTaskState(task);
+        /* private void showEditTaskDialog() {
+             //final AlertDialog editTaskDialog = new AlertDialog(getActivity());
+             editTaskDialog.setView(tempView);
+             initUiEditTaskDialog();
+             initDefaultValue();
+             deleteIcon.setOnClickListener(new View.OnClickListener() {
+                 @Override
+                 public void onClick(View view) {
+                     showDeleteTaskDialog();
+                     editTaskDialog.dismiss();
+                 }
+             });
+             editTaskDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
+                     new DialogInterface.OnClickListener() {
+                         @Override
+                         public void onClick(DialogInterface dialogInterface, int i) {
+                             Long id = mRepository.getTaskList(userId, State.DOING).get(lastPosition).getMId();
+                             Task task = mRepository.getTask(id);
+                             initTaskName(task);
+                             initTaskState(task);
 
 
-                          *//*  try {
+                           *//*  try {
                                 mRepository.updateTask(task);
                             } catch (TaskNotExistException e) {
                                 Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -339,14 +347,14 @@ public class DoingFragment extends Fragment {
         }
 
         private void deleteRow() {
-            Long id = mRepository.getTaskList(userId, State.DOING).get(lastPosition).getMId();
+            Long id = mRepository.getTaskList(userId, stateValue).get(lastPosition).getMId();
             Task deleteTask = mRepository.getTask(id);
             Log.e("TAG4", deleteTask.getMUser().getMUserName());
             try {
                 mRepository.deleteTask(deleteTask);
-                mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DOING));
+                mTaskAdapter.setTasks(mRepository.getTaskList(userId, stateValue));
                 mTaskAdapter.notifyDataSetChanged();
-                if (mRepository.getTaskList(userId, State.DOING).size() == 0) {
+                if (mRepository.getTaskList(userId, stateValue).size() == 0) {
                     emptyListIcon.setVisibility(View.VISIBLE);
                     mRecyclerViewTask.setVisibility(View.GONE);
                 }
@@ -357,20 +365,20 @@ public class DoingFragment extends Fragment {
 
         public void bindTasks(Task task) {
             mTextViewName.setText(task.getMName());
-            mTextViewDate.setText(task.getMDate().toString());
+            //    mTextViewDate.setText(task.getMDate().toString());
         }
 
         @Override
         public void onCheckedChanged(RadioGroup radioGroup, int id) {
             switch (radioGroup.getCheckedRadioButtonId()) {
                 case R.id.todo_radio_button:
-                    mRepository.getTaskList(userId, State.DOING).get(lastPosition).setMState(State.TODO);
+                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.TODO);
                     break;
                 case R.id.doing_radio_button:
-                    mRepository.getTaskList(userId, State.DOING).get(lastPosition).setMState(State.DOING);
+                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.DOING);
                     break;
                 case R.id.done_radio_button:
-                    mRepository.getTaskList(userId, State.DOING).get(lastPosition).setMState(State.DONE);
+                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.DONE);
                     break;
             }
 

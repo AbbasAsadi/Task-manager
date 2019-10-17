@@ -33,6 +33,7 @@ import com.example.hw10.controller.activity.MainActivity;
 import com.example.hw10.exception.TaskNotExistException;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
+import com.example.hw10.model.StateConverter;
 import com.example.hw10.model.Task;
 import com.github.ivbaranov.mli.MaterialLetterIcon;
 import com.google.android.material.button.MaterialButton;
@@ -46,7 +47,7 @@ import java.util.Random;
 public class DoneFragment extends Fragment {
     public static final String USER_ID = "userId";
     private static final String TAG = "doneFragment";
-
+    private static int stateValue;
     private Long userId;
     private int lastPosition;
 
@@ -55,6 +56,7 @@ public class DoneFragment extends Fragment {
     private DoneFragment.TaskAdapter mTaskAdapter;
     private List<Task> mTaskList;
     private Repository mRepository;
+    private StateConverter mStateConverter;
 
     public DoneFragment() {
         // Required empty public constructor
@@ -78,7 +80,9 @@ public class DoneFragment extends Fragment {
         Log.e("TAG1", "in listFragment userId:#" + userId);
 
         showSubtitle();
-        mTaskList = mRepository.getTaskList(userId, State.DONE);
+        mStateConverter = new StateConverter();
+        stateValue = mStateConverter.convertToDatabaseValue(State.DONE);
+        mTaskList = mRepository.getTaskList(userId, stateValue);
     }
 
     private void showSubtitle() {
@@ -94,6 +98,7 @@ public class DoneFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_done, container, false);
         initUi(view);
+        Log.e("where am I", "onCreateView");
         updateUi();
         return view;
     }
@@ -107,24 +112,28 @@ public class DoneFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DONE));
+        Log.e("where am I", "onResume");
+        updateUi();
+        mTaskAdapter.setTasks(mRepository.getTaskList(userId, stateValue));
+        mRecyclerViewTask.setAdapter(mTaskAdapter);
         mTaskAdapter.notifyDataSetChanged();
     }
 
     private void updateUi() {
-        mTaskList = mRepository.getTaskList(userId, State.DONE);
+        mTaskList = mRepository.getTaskList(userId, stateValue);
         if (mTaskAdapter == null) {
             Log.e(TAG, "Task Adapter is null");
             mTaskAdapter = new DoneFragment.TaskAdapter(getActivity(), mTaskList);
             mRecyclerViewTask.setAdapter(mTaskAdapter);
-            if (mTaskList.size() != 0) {
-                emptyListIcon.setVisibility(View.GONE);
-                mRecyclerViewTask.setVisibility(View.VISIBLE);
-            }
+
         } else {
             Log.e(TAG, "Task Adapter exist");
             mTaskAdapter.setTasks(mTaskList);
             mTaskAdapter.notifyDataSetChanged();
+        }
+        if (mTaskList.size() != 0) {
+            emptyListIcon.setVisibility(View.GONE);
+            mRecyclerViewTask.setVisibility(View.VISIBLE);
         }
     }
 
@@ -148,6 +157,7 @@ public class DoneFragment extends Fragment {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Repository.getInstance().deleteAllTask(userId);
                         mTaskAdapter = null;
+                        Log.e("where am I", "delete_all_task_menu_item");
                         updateUi();
                         mRecyclerViewTask.setVisibility(View.GONE);
                         emptyListIcon.setVisibility(View.VISIBLE);
@@ -181,7 +191,7 @@ public class DoneFragment extends Fragment {
 
         public TaskHolder(@NonNull final View itemView) {
             super(itemView);
-            //initUi(itemView);
+            initUi(itemView);
 
 
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -199,15 +209,15 @@ public class DoneFragment extends Fragment {
             });
 
         }
-/*
+
         private void initUi(@NonNull View itemView) {
-            tempView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_layout, null);
+            //tempView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_layout, null);
             mTextViewName = itemView.findViewById(R.id.name_item_task);
             mTextViewDate = itemView.findViewById(R.id.date_item_task);
             mMaterialLetterIcon = itemView.findViewById(R.id.icon_item_task);
         }
 
-        private void showEditTaskDialog() {
+     /*   private void showEditTaskDialog() {
             //final AlertDialog editTaskDialog = new AlertDialog(getActivity());
             editTaskDialog.setView(tempView);
             initUiEditTaskDialog();
@@ -356,20 +366,20 @@ public class DoneFragment extends Fragment {
 
         public void bindTasks(Task task) {
             mTextViewName.setText(task.getMName());
-            mTextViewDate.setText(task.getMDate().toString());
+        //    mTextViewDate.setText(task.getMDate().toString());
         }
 
         @Override
         public void onCheckedChanged(RadioGroup radioGroup, int id) {
             switch (radioGroup.getCheckedRadioButtonId()) {
                 case R.id.todo_radio_button:
-                    mRepository.getTaskList(userId, State.DONE).get(lastPosition).setMState(State.TODO);
+                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.TODO);
                     break;
                 case R.id.doing_radio_button:
-                    mRepository.getTaskList(userId, State.DONE).get(lastPosition).setMState(State.DOING);
+                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.DOING);
                     break;
                 case R.id.done_radio_button:
-                    mRepository.getTaskList(userId, State.DONE).get(lastPosition).setMState(State.DONE);
+                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.DONE);
                     break;
             }
 

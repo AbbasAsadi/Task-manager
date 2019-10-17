@@ -58,10 +58,10 @@ public class Repository {
                 .list();
     }
 
-    public List<Task> getTaskList(Long id, State state) {
+    public List<Task> getTaskList(Long id, Integer stateValue) {
         return mTaskDao.queryBuilder()
                 .where(TaskDao.Properties.UserId.eq(id))
-                .where(TaskDao.Properties.MState.eq(state))
+                .where(TaskDao.Properties.MState.eq(stateValue))
                 .list();
     }
 
