@@ -65,6 +65,7 @@ public class Repository {
                 .list();
     }
 
+
 /*    public int getPosition(UUID uuid) {
 //        return mCrimes.indexOf(getCrime(uuid));
         List<Task> tasks = getTaskList();

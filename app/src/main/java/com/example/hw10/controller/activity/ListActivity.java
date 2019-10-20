@@ -1,42 +1,25 @@
 package com.example.hw10.controller.activity;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioGroup;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.hw10.R;
-import com.example.hw10.controller.fragment.DatePickerFragment;
 import com.example.hw10.controller.fragment.DialogFragment;
 import com.example.hw10.controller.fragment.DoingFragment;
 import com.example.hw10.controller.fragment.DoneFragment;
-import com.example.hw10.controller.fragment.ListFragment;
 import com.example.hw10.controller.fragment.TodoFragment;
-import com.example.hw10.controller.fragment.ViewPagerAdapter;
+import com.example.hw10.controller.adapter.ViewPagerAdapter;
 import com.example.hw10.model.Repository;
-import com.example.hw10.model.State;
-import com.example.hw10.model.Task;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
-
-import java.util.Date;
 
 public class ListActivity extends AppCompatActivity {
     public static final String EXTRA_USER_ID = "userId";

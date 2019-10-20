@@ -1,4 +1,4 @@
-package com.example.hw10.controller.fragment;
+package com.example.hw10.controller.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

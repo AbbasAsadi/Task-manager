@@ -2,6 +2,7 @@ package com.example.hw10.controller.fragment;
 
 
 import android.app.Dialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,12 +25,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hw10.R;
 import com.example.hw10.controller.activity.MainActivity;
+import com.example.hw10.controller.adapter.TaskAdapter;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
 import com.example.hw10.model.StateConverter;
@@ -48,13 +51,15 @@ public class DoingFragment extends Fragment {
     private static final String TAG = "doingFragment";
     private static int stateValue;
     private Long userId;
-    private int lastPosition;
+    //private int lastPosition;
 
     private ImageView emptyListIcon;
     private RecyclerView mRecyclerViewTask;
-    private DoingFragment.TaskAdapter mTaskAdapter;
+    private TaskAdapter mTaskAdapter;
     private List<Task> mTaskList;
     private Repository mRepository;
+    private SearchView searchView;
+    private SearchView.OnQueryTextListener queryTextListener;
     private StateConverter mStateConverter;
 
     public DoingFragment() {
@@ -123,7 +128,7 @@ public class DoingFragment extends Fragment {
         mTaskList = mRepository.getTaskList(userId, stateValue);
         if (mTaskAdapter == null) {
             Log.e(TAG, "Task Adapter is null");
-            mTaskAdapter = new TaskAdapter(getActivity(), mTaskList);
+            mTaskAdapter = new TaskAdapter(getActivity(), mTaskList , State.DOING);
             mRecyclerViewTask.setAdapter(mTaskAdapter);
             if (mTaskList.size() != 0) {
                 emptyListIcon.setVisibility(View.GONE);
@@ -140,6 +145,33 @@ public class DoingFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_list_fragment, menu);
+
+        MenuItem searchItem = menu.findItem(R.id.search_task_menu_item);
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+
+        if (searchItem != null) {
+            searchView = (SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+
+            queryTextListener = new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    mTaskAdapter.getFilter().filter(newText);
+
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    mTaskAdapter.getFilter().filter(query);
+
+                    return true;
+                }
+            };
+            searchView.setOnQueryTextListener(queryTextListener);
+        }
     }
 
     @Override
@@ -170,267 +202,11 @@ public class DoingFragment extends Fragment {
                     }
                 });
                 dialog.show();
+                break;
+            case R.id.search_task_menu_item:
+                return true;
         }
+        searchView.setOnQueryTextListener(queryTextListener);
         return super.onOptionsItemSelected(item);
-    }
-
-    public class TaskHolder extends RecyclerView.ViewHolder implements RadioGroup.OnCheckedChangeListener {
-        private final AlertDialog editTaskDialog = new AlertDialog.Builder(getActivity()).create();
-        private TextView mTextViewName;
-        private TextView mTextViewDate;
-        private MaterialLetterIcon mMaterialLetterIcon;
-        private EditText mEditTextNameDialog;
-        private RadioGroup mRadioGroup;
-        private EditText mEditTextDescription;
-        private MaterialButton setDate;
-        private MaterialButton setTime;
-        private ImageView deleteIcon;
-        //private View tempView;
-        private String nameTask;
-
-        public TaskHolder(@NonNull final View itemView) {
-            super(itemView);
-            initUi(itemView);
-
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    //Log.d("lastPosition", lastPosition + "");
-                    lastPosition = getAdapterPosition();
-                    // Log.d("lastPosition", lastPosition + "");
-                    //showEditTaskDialog();
-                    //updateUi();
-
-
-                }
-            });
-
-        }
-
-        private void initUi(@NonNull View itemView) {
-            //tempView = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_layout, null);
-            mTextViewName = itemView.findViewById(R.id.name_item_task);
-            mTextViewDate = itemView.findViewById(R.id.date_item_task);
-            mMaterialLetterIcon = itemView.findViewById(R.id.icon_item_task);
-        }
-
-        /* private void showEditTaskDialog() {
-             //final AlertDialog editTaskDialog = new AlertDialog(getActivity());
-             editTaskDialog.setView(tempView);
-             initUiEditTaskDialog();
-             initDefaultValue();
-             deleteIcon.setOnClickListener(new View.OnClickListener() {
-                 @Override
-                 public void onClick(View view) {
-                     showDeleteTaskDialog();
-                     editTaskDialog.dismiss();
-                 }
-             });
-             editTaskDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
-                     new DialogInterface.OnClickListener() {
-                         @Override
-                         public void onClick(DialogInterface dialogInterface, int i) {
-                             Long id = mRepository.getTaskList(userId, State.DOING).get(lastPosition).getMId();
-                             Task task = mRepository.getTask(id);
-                             initTaskName(task);
-                             initTaskState(task);
-
-
-                           *//*  try {
-                                mRepository.updateTask(task);
-                            } catch (TaskNotExistException e) {
-                                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }*//*
-                            Log.e(TAG, "last position is ##" + lastPosition);
-                            mTaskAdapter.notifyItemChanged(lastPosition);
-                            mTaskAdapter.setTasks(mRepository.getTaskList(userId, State.DOING));
-                            editTaskDialog.dismiss();
-                        }
-                    });
-            editTaskDialog.show();
-        }
-
-        private void initUiEditTaskDialog() {
-            mEditTextNameDialog = tempView.findViewById(R.id.set_name_edit);
-            mRadioGroup = tempView.findViewById(R.id.radio_group_dialog);
-            mEditTextDescription = tempView.findViewById(R.id.set_description_edit);
-            setDate = tempView.findViewById(R.id.set_date_button);
-            setTime = tempView.findViewById(R.id.set_time_button);
-            deleteIcon = tempView.findViewById(R.id.delete_icon);
-            deleteIcon.setVisibility(View.VISIBLE);
-        }
-
-        private void initDefaultValue() {
-            Task tempTask = mRepository.getTaskList(userId, State.DOING).get(lastPosition);
-            mEditTextNameDialog.setText(tempTask.getMName());
-            mEditTextDescription.setText(tempTask.getMDescription());
-            setDate.setText(tempTask.getMDate().toString());
-            //setTime.setText((int) tempTask.getTime());
-            State state = tempTask.getMState();
-            if (state == State.DOING) {
-                mRadioGroup.check(R.id.todo_radio_button);
-
-            } else if (state == State.DOING) {
-                mRadioGroup.check(R.id.doing_radio_button);
-
-            } else if (state == State.DONE) {
-                mRadioGroup.check(R.id.done_radio_button);
-            }
-        }
-
-        private void initTaskName(Task task) {
-            nameTask = mEditTextNameDialog.getText().toString();
-            if (!nameTask.isEmpty()) {
-                try {
-                    task.setMName(nameTask);
-                    mRepository.updateTask(task);
-                } catch (TaskNotExistException e) {
-                    Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-
-            }
-
-        }
-
-        private void initTaskState(Task task) {
-            if (mRadioGroup.getCheckedRadioButtonId() != -1) {
-                int radioButtonId = mRadioGroup.getCheckedRadioButtonId();
-                switch (radioButtonId) {
-                    case R.id.todo_radio_button:
-                        task.setMState(State.TODO);
-                        try {
-                            mRepository.updateTask(task);
-                        } catch (TaskNotExistException e) {
-                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                    case R.id.doing_radio_button:
-                        task.setMState(State.DOING);
-                        try {
-                            mRepository.updateTask(task);
-                        } catch (TaskNotExistException e) {
-                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                    case R.id.done_radio_button:
-                        task.setMState(State.DONE);
-                        try {
-                            mRepository.updateTask(task);
-                        } catch (TaskNotExistException e) {
-                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                }
-            }
-
-        }
-*/
-        private void showDeleteTaskDialog() {
-            final AlertDialog editTaskDialog = new AlertDialog.Builder(getActivity()).create();
-            editTaskDialog.setMessage("Do you want to delete this task?");
-            editTaskDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    deleteRow();
-                    editTaskDialog.dismiss();
-                }
-            });
-            editTaskDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    editTaskDialog.dismiss();
-                }
-            });
-            editTaskDialog.show();
-        }
-
-        private void deleteRow() {
-            Long id = mRepository.getTaskList(userId, stateValue).get(lastPosition).getMId();
-            Task deleteTask = mRepository.getTask(id);
-            Log.e("TAG4", deleteTask.getMUser().getMUserName());
-            try {
-                mRepository.deleteTask(deleteTask);
-                mTaskAdapter.setTasks(mRepository.getTaskList(userId, stateValue));
-                mTaskAdapter.notifyDataSetChanged();
-                if (mRepository.getTaskList(userId, stateValue).size() == 0) {
-                    emptyListIcon.setVisibility(View.VISIBLE);
-                    mRecyclerViewTask.setVisibility(View.GONE);
-                }
-            } catch (Exception e) {
-                Toast.makeText(getActivity(), "this Task does not exist!!!", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        public void bindTasks(Task task) {
-            mTextViewName.setText(task.getMName());
-            //    mTextViewDate.setText(task.getMDate().toString());
-        }
-
-        @Override
-        public void onCheckedChanged(RadioGroup radioGroup, int id) {
-            switch (radioGroup.getCheckedRadioButtonId()) {
-                case R.id.todo_radio_button:
-                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.TODO);
-                    break;
-                case R.id.doing_radio_button:
-                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.DOING);
-                    break;
-                case R.id.done_radio_button:
-                    mRepository.getTaskList(userId, stateValue).get(lastPosition).setMState(State.DONE);
-                    break;
-            }
-
-        }
-    }
-
-
-    public class TaskAdapter extends RecyclerView.Adapter<DoingFragment.TaskHolder> {
-        private List<Task> mTasks;
-        private int[] mMaterialColors;
-        private Context mContext;
-
-        public TaskAdapter(Context context, List<Task> tasks) {
-            this.mTasks = tasks;
-            this.mContext = context;
-            this.mMaterialColors = getContext().getResources().getIntArray(R.array.colors);
-        }
-
-        public void setTasks(List<Task> tasks) {
-            mTasks = tasks;
-        }
-
-        @NonNull
-        @Override
-        public DoingFragment.TaskHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new DoingFragment.TaskHolder(LayoutInflater.from(mContext)
-                    .inflate(R.layout.list_item_task, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull DoingFragment.TaskHolder holder, int position) {
-            Log.e(TAG, "position#" + position);
-            if (position % 2 == 0)
-                holder.itemView.setBackgroundColor(Color.rgb(145, 196, 153));
-            else
-                holder.itemView.setBackgroundColor(Color.rgb(242, 233, 220));
-
-            handleMaterialLetterIcon(holder, position);
-            holder.bindTasks(mTasks.get(position));
-        }
-
-        private void handleMaterialLetterIcon(@NonNull DoingFragment.TaskHolder holder, int position) {
-            holder.mMaterialLetterIcon.setInitials(true);
-            holder.mMaterialLetterIcon.setInitialsNumber(1);
-            holder.mMaterialLetterIcon.setLetterSize(20);
-            holder.mMaterialLetterIcon.setShapeColor(mMaterialColors[new Random().nextInt(mMaterialColors.length)]);
-            holder.mMaterialLetterIcon.setLetter(mTasks.get(position).getMName());
-        }
-
-        @Override
-        public int getItemCount() {
-            return mTasks.size();
-        }
     }
 }

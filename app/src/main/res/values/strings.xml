@@ -1,9 +1,8 @@
 <resources>
-    <string name="app_name">HW10</string>
+    <string name="app_name">TaskManager</string>
 
     <string name="open_toggle">Open</string>
     <string name="close_toggle">Close</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
