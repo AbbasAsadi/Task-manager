@@ -14,12 +14,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,19 +26,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import com.example.hw10.R;
-import com.example.hw10.controller.activity.MainActivity;
-import com.example.hw10.exception.TaskNotExistException;
+import com.example.hw10.controller.activity.LoginActivity;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
 import com.example.hw10.model.Task;
 import com.github.ivbaranov.mli.MaterialLetterIcon;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -168,7 +162,7 @@ public class ListFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sign_out_menu_item:
-                startActivity(new Intent(getActivity(), MainActivity.class));
+                startActivity(new Intent(getActivity(), LoginActivity.class));
                 break;
             case R.id.delete_all_task_menu_item:
                 final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();

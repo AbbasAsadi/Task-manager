@@ -1,6 +1,8 @@
 package com.example.hw10.controller.fragment;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -10,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -26,14 +29,17 @@ import com.google.android.material.button.MaterialButton;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MainFragment extends Fragment {
+public class LoginFragment extends Fragment {
     public static final String USER_ID = "userId";
+    public static final String ALREADY_SIGN_IN = "userSignedIn";
+    public static final String SIGN_IN_USER_ID = "signInUserId";
     private EditText mEditTextUserName;
     private EditText mEditTextPassword;
-    private MaterialButton logInButton;
+    private MaterialButton mButtonLogin;
+    private CheckBox mCheckBoxRememberMe;
     private Repository mRepository;
 
-    public MainFragment() {
+    public LoginFragment() {
         // Required empty public constructor
     }
 
@@ -48,9 +54,11 @@ public class MainFragment extends Fragment {
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
         initUi(view);
-        logInButton.setOnClickListener(new View.OnClickListener() {
+
+
+        mButtonLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String userName = mEditTextUserName.getText().toString();
@@ -68,8 +76,19 @@ public class MainFragment extends Fragment {
                     Toast.makeText(getActivity(), "user name and password not match", Toast.LENGTH_LONG).show();
                 } else if (mRepository.getUser(userName).getMUserName().equals(userName) &&
                         mRepository.getUser(userName).getMPassword().equals(password)) {
-                    startActivity(ListActivity.newIntent(getActivity(), mRepository.getUser(userName).getMId()));
-                }else {
+                    Long userId = mRepository.getUser(userName).getMId();
+                    SharedPreferences sharedPreferences = getActivity().getApplicationContext().getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    if (mCheckBoxRememberMe.isChecked()) {
+                        editor.putBoolean(ALREADY_SIGN_IN, true);
+                        editor.putLong(SIGN_IN_USER_ID, userId);
+                        editor.commit();
+                    } else {
+                        editor.putBoolean(ALREADY_SIGN_IN, false);
+                        editor.commit();
+                    }
+                    startActivity(ListActivity.newIntent(getActivity(), userId));
+                } else {
                     Toast.makeText(getActivity(), "something's wrong", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -81,7 +100,8 @@ public class MainFragment extends Fragment {
     private void initUi(@NonNull View view) {
         mEditTextUserName = view.findViewById(R.id.user_name_edit_text);
         mEditTextPassword = view.findViewById(R.id.password_edit_text);
-        logInButton = view.findViewById(R.id.logIn_button);
+        mButtonLogin = view.findViewById(R.id.login_button);
+        mCheckBoxRememberMe = view.findViewById(R.id.checkbox_remember_me);
     }
 
     @Override

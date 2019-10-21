@@ -6,6 +6,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hw10.R;
-import com.example.hw10.controller.activity.MainActivity;
+import com.example.hw10.controller.activity.LoginActivity;
 import com.example.hw10.controller.adapter.TaskAdapter;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
@@ -34,6 +35,8 @@ import com.example.hw10.model.StateConverter;
 import com.example.hw10.model.Task;
 
 import java.util.List;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -171,8 +174,21 @@ public class DoneFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sign_out_menu_item:
-                startActivity(new Intent(getActivity(), MainActivity.class));
-                break;
+                AlertDialog exitDialog = new AlertDialog.Builder(getActivity())
+                        .setTitle("are ypu sure you want to log out of your account?")
+                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                SharedPreferences.Editor editor = getActivity().getApplicationContext()
+                                        .getSharedPreferences("MyPref", MODE_PRIVATE).edit();
+                                editor.putBoolean(LoginFragment.ALREADY_SIGN_IN, false);
+                                editor.commit();
+                                startActivity(new Intent(getActivity(), LoginActivity.class));
+                            }
+                        })
+                        .setNegativeButton("NO" , null)
+                        .create();
+                exitDialog.show();                break;
             case R.id.delete_all_task_menu_item:
                 final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();
                 dialog.setMessage("Do you want to delete all Tasks?");

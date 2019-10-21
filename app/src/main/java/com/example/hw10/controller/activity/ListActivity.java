@@ -34,9 +34,9 @@ public class ListActivity extends AppCompatActivity {
     private ImageView emptyListIcon;
     private RecyclerView mRecyclerViewTask;
 
-    public static Intent newIntent(Context context, Long id) {
+    public static Intent newIntent(Context context, Long userId) {
         Intent intent = new Intent(context, ListActivity.class);
-        intent.putExtra(EXTRA_USER_ID, id);
+        intent.putExtra(EXTRA_USER_ID, userId);
         return intent;
     }
 
