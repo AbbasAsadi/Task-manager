@@ -35,6 +35,9 @@ public class DatePickerFragment extends DialogFragment {
     public DatePickerFragment() {
         // Required empty public constructor
     }
+    public static String getExtraTaskDate() {
+        return EXTRA_TASK_DATE;
+    }
 
     public static DatePickerFragment newInstance(Date date) {
 
@@ -62,7 +65,7 @@ public class DatePickerFragment extends DialogFragment {
 
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
-                .setTitle("Date of crime:")
+                .setTitle("Date of Task:")
                 .setPositiveButton("ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

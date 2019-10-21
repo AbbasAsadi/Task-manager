@@ -4,6 +4,7 @@ package com.example.hw10.controller.fragment;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,11 +23,18 @@ import com.example.hw10.model.State;
 import com.example.hw10.model.Task;
 import com.google.android.material.button.MaterialButton;
 
+import java.util.Calendar;
+import java.util.Date;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class DialogFragment extends androidx.fragment.app.DialogFragment {
     public static final String EXTRA_USER_ID = "userId";
+    public static final String DATE_PICKER_FRAGMENT_TAG = "DatePicker";
+    public static final int REQUEST_CODE_DATE_PICKER = 0;
+    public static final int REQUEST_CODE_TIME_PICKER = 1;
+    private static final String TIME_PICKER_FRAGMENT_TAG = "TimePicker";
     private EditText mEditTextName;
     private EditText mEditTextDescription;
     private MaterialButton mButtonSetDate;
@@ -34,7 +42,7 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
     private MaterialButton mButtonDone;
     private RadioGroup mRadioGroupState;
     private Repository mRepository;
-
+    private Task mCurrentTask;
     private Long userId;
 
     public DialogFragment() {
@@ -75,6 +83,7 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
         // setStyle(DialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
         userId = getArguments().getLong(EXTRA_USER_ID);
         mRepository = Repository.getInstance();
+        mCurrentTask = new Task();
     }
 
     @NonNull
@@ -91,30 +100,50 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
         View view = inflater.inflate(R.layout.fragment_dialog, container, false);
         initUi(view);
 
+        mButtonSetTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TimePickerFragment timePickerFragment = TimePickerFragment.newInstance();
+                timePickerFragment.setTargetFragment(DialogFragment.this, REQUEST_CODE_TIME_PICKER);
+                timePickerFragment.show(getFragmentManager(), TIME_PICKER_FRAGMENT_TAG);
+            }
+        });
+
+
+        mButtonSetDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(new Date());
+                //create parent-child between CrimeDetailFragment and DatePickerFragment
+                datePickerFragment.setTargetFragment(DialogFragment.this, REQUEST_CODE_DATE_PICKER);
+
+                datePickerFragment.show(getFragmentManager(), DATE_PICKER_FRAGMENT_TAG);
+            }
+        });
+
         mButtonDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Task task = new Task();
                 String taskName = mEditTextName.getText().toString().trim();
                 String taskDescription = mEditTextDescription.getText().toString().trim();
 
                 if (!taskName.isEmpty() || mRadioGroupState.getCheckedRadioButtonId() != -1) {
-                    task.setMName(taskName);
-                    task.setMDescription(taskDescription);
-                    task.setUserId(userId);
+                    mCurrentTask.setMName(taskName);
+                    mCurrentTask.setMDescription(taskDescription);
+                    mCurrentTask.setUserId(userId);
                     int radioButtonId = mRadioGroupState.getCheckedRadioButtonId();
                     switch (radioButtonId) {
                         case R.id.todo_radio_button:
-                            task.setMState(State.TODO);
+                            mCurrentTask.setMState(State.TODO);
                             break;
                         case R.id.doing_radio_button:
-                            task.setMState(State.DOING);
+                            mCurrentTask.setMState(State.DOING);
                             break;
                         case R.id.done_radio_button:
-                            task.setMState(State.DONE);
+                            mCurrentTask.setMState(State.DONE);
                             break;
                     }
-                    mRepository.insertTask(task);
+                    mRepository.insertTask(mCurrentTask);
                     dismiss();
                 }
             }
@@ -132,4 +161,40 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
         mRadioGroupState = view.findViewById(R.id.radio_group_dialog);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return;
+        if (requestCode == REQUEST_CODE_DATE_PICKER) {
+            Date date = (Date) data.getSerializableExtra(
+                    DatePickerFragment.getExtraTaskDate());
+            mCurrentTask.setMDate(date);
+            mButtonSetDate.setText(convertTime(date, 0));
+        }
+        if (requestCode == REQUEST_CODE_TIME_PICKER) {
+            long time = data.getLongExtra(
+                    TimePickerFragment.getExtraTaskTIME(), 0);
+            mCurrentTask.setMTime(time);
+            mButtonSetTime.setText(convertTime(null, time));
+        }
+    }
+
+    private String convertTime(Date date, long time) {
+        Calendar calendar = Calendar.getInstance();
+        if (date != null) {
+            calendar.setTime(date);
+            return calendar.get(Calendar.YEAR) +
+                    " / " +
+                    calendar.get(Calendar.MONTH) +
+                    " / " +
+                    calendar.get(Calendar.DAY_OF_MONTH);
+        } else if (time != 0) {
+            calendar.setTimeInMillis(time);
+            return calendar.get(Calendar.HOUR_OF_DAY) +
+                    " : " +
+                    calendar.get(Calendar.MINUTE);
+        }
+        return "not Match";
+    }
 }
