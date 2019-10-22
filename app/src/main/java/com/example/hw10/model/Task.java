@@ -1,5 +1,7 @@
 package com.example.hw10.model;
 
+import com.example.hw10.utility.StateConverter;
+
 import org.greenrobot.greendao.annotation.Convert;
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Id;

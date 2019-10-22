@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +17,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.hw10.MyDialogCloseListener;
 import com.example.hw10.R;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
 import com.example.hw10.model.Task;
+import com.example.hw10.utility.MyDialogCloseListener;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.Calendar;
@@ -30,6 +31,7 @@ import java.util.Date;
  * A simple {@link Fragment} subclass.
  */
 public class DialogFragment extends androidx.fragment.app.DialogFragment {
+    public static final String TAG = "DialogFragment";
     public static final String EXTRA_USER_ID = "userId";
     public static final String DATE_PICKER_FRAGMENT_TAG = "DatePicker";
     public static final int REQUEST_CODE_DATE_PICKER = 0;
@@ -58,9 +60,28 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
         return fragment;
     }
 
+    public static String convertTime(Date date, long time) {
+        Calendar calendar = Calendar.getInstance();
+        if (date != null) {
+            calendar.setTime(date);
+            return calendar.get(Calendar.YEAR) +
+                    " / " +
+                    calendar.get(Calendar.MONTH) +
+                    " / " +
+                    calendar.get(Calendar.DAY_OF_MONTH);
+        } else if (time != 0) {
+            calendar.setTimeInMillis(time);
+            return calendar.get(Calendar.HOUR_OF_DAY) +
+                    " : " +
+                    calendar.get(Calendar.MINUTE);
+        }
+        return "not Match";
+    }
+
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
-//        super.onDismiss(dialog);
+        super.onDismiss(dialog);
+        Log.e(TAG, "onDismiss");
         Activity activity = getActivity();
         if (activity instanceof MyDialogCloseListener)
             ((MyDialogCloseListener) activity).handleDialogClose(dialog);
@@ -69,6 +90,7 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.e(TAG, "onStart");
         Dialog dialog = getDialog();
         if (dialog != null) {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
@@ -178,23 +200,5 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
             mCurrentTask.setMTime(time);
             mButtonSetTime.setText(convertTime(null, time));
         }
-    }
-
-    private String convertTime(Date date, long time) {
-        Calendar calendar = Calendar.getInstance();
-        if (date != null) {
-            calendar.setTime(date);
-            return calendar.get(Calendar.YEAR) +
-                    " / " +
-                    calendar.get(Calendar.MONTH) +
-                    " / " +
-                    calendar.get(Calendar.DAY_OF_MONTH);
-        } else if (time != 0) {
-            calendar.setTimeInMillis(time);
-            return calendar.get(Calendar.HOUR_OF_DAY) +
-                    " : " +
-                    calendar.get(Calendar.MINUTE);
-        }
-        return "not Match";
     }
 }

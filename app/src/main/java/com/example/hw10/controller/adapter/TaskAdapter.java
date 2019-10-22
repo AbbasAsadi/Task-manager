@@ -2,7 +2,6 @@ package com.example.hw10.controller.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.print.PrinterId;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,14 +14,12 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.hw10.R;
-import com.example.hw10.controller.fragment.TodoFragment;
-import com.example.hw10.model.Repository;
+import com.example.hw10.controller.fragment.DialogFragment;
 import com.example.hw10.model.State;
-import com.example.hw10.model.StateConverter;
+import com.example.hw10.utility.StateConverter;
 import com.example.hw10.model.Task;
 import com.github.ivbaranov.mli.MaterialLetterIcon;
 import com.google.android.material.button.MaterialButton;
@@ -310,7 +307,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskHolder> im
 
         public void bindTasks(Task task) {
             mTextViewName.setText(task.getMName());
-//            mTextViewDate.setText(task.getMDate().toString());
+            mTextViewDate.setText(DialogFragment.convertTime(task.getMDate() , 0));
         }
 
         @Override

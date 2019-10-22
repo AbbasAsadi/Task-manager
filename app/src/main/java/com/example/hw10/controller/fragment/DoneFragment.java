@@ -1,7 +1,6 @@
 package com.example.hw10.controller.fragment;
 
 
-import android.app.Dialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -31,7 +30,8 @@ import com.example.hw10.controller.activity.LoginActivity;
 import com.example.hw10.controller.adapter.TaskAdapter;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
-import com.example.hw10.model.StateConverter;
+import com.example.hw10.utility.MyDialogCloseListener;
+import com.example.hw10.utility.StateConverter;
 import com.example.hw10.model.Task;
 
 import java.util.List;
@@ -41,7 +41,7 @@ import static android.content.Context.MODE_PRIVATE;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DoneFragment extends Fragment {
+public class DoneFragment extends Fragment implements MyDialogCloseListener {
     public static final String USER_ID = "userId";
     private static final String TAG = "doneFragment";
     private static int stateValue;
@@ -97,7 +97,7 @@ public class DoneFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_done, container, false);
         initUi(view);
-        Log.e("where am I", "onCreateView");
+        Log.e(TAG, "onCreateView");
         updateUi();
         return view;
     }
@@ -112,10 +112,8 @@ public class DoneFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.e("where am I", "onResume");
-        updateUi();
+        Log.e(TAG, "onResume");
         mTaskAdapter.setTasks(mRepository.getTaskList(userId, stateValue));
-        mRecyclerViewTask.setAdapter(mTaskAdapter);
         mTaskAdapter.notifyDataSetChanged();
     }
 
@@ -129,6 +127,7 @@ public class DoneFragment extends Fragment {
         } else {
             Log.e(TAG, "Task Adapter exist");
             mTaskAdapter.setTasks(mTaskList);
+            mRecyclerViewTask.setAdapter(mTaskAdapter);
             mTaskAdapter.notifyDataSetChanged();
         }
         if (mTaskList.size() != 0) {
@@ -174,43 +173,10 @@ public class DoneFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sign_out_menu_item:
-                AlertDialog exitDialog = new AlertDialog.Builder(getActivity())
-                        .setTitle("are ypu sure you want to log out of your account?")
-                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                SharedPreferences.Editor editor = getActivity().getApplicationContext()
-                                        .getSharedPreferences("MyPref", MODE_PRIVATE).edit();
-                                editor.putBoolean(LoginFragment.ALREADY_SIGN_IN, false);
-                                editor.commit();
-                                startActivity(new Intent(getActivity(), LoginActivity.class));
-                            }
-                        })
-                        .setNegativeButton("NO" , null)
-                        .create();
-                exitDialog.show();                break;
+                exitDialog();
+                break;
             case R.id.delete_all_task_menu_item:
-                final AlertDialog dialog = new AlertDialog.Builder(getActivity()).create();
-                dialog.setMessage("Do you want to delete all Tasks?");
-                dialog.setButton(Dialog.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Repository.getInstance().deleteAllTask(userId);
-                        mTaskAdapter = null;
-                        Log.e("where am I", "delete_all_task_menu_item");
-                        updateUi();
-                        mRecyclerViewTask.setVisibility(View.GONE);
-                        emptyListIcon.setVisibility(View.VISIBLE);
-                        dialog.dismiss();
-                    }
-                });
-                dialog.setButton(Dialog.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
+                deleteAllTaskDialog();
                 break;
 
             case R.id.search_task_menu_item:
@@ -218,5 +184,52 @@ public class DoneFragment extends Fragment {
         }
         searchView.setOnQueryTextListener(queryTextListener);
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteAllTaskDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(getActivity())
+                .setMessage("Do you want to delete all Tasks?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Repository.getInstance().deleteAllTask(userId);
+                        mTaskAdapter = null;
+                        Log.e(TAG, "delete_all_task_menu_item");
+                        updateUi();
+                        mRecyclerViewTask.setVisibility(View.GONE);
+                        emptyListIcon.setVisibility(View.VISIBLE);
+                        //dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // dialog.dismiss();
+                    }
+                }).create();
+        dialog.show();
+    }
+
+    private void exitDialog() {
+        AlertDialog exitDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("are ypu sure you want to log out of your account?")
+                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SharedPreferences.Editor editor = getActivity().getApplicationContext()
+                                .getSharedPreferences("MyPref", MODE_PRIVATE).edit();
+                        editor.putBoolean(LoginFragment.ALREADY_SIGN_IN, false);
+                        editor.commit();
+                        startActivity(new Intent(getActivity(), LoginActivity.class));
+                    }
+                })
+                .setNegativeButton("NO" , null)
+                .create();
+        exitDialog.show();
+    }
+
+    @Override
+    public void handleDialogClose(DialogInterface dialog) {
+        mTaskAdapter.notifyDataSetChanged();
     }
 }
