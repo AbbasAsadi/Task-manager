@@ -12,12 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.hw10.R;
+import com.example.hw10.exception.TaskNotExistException;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
 import com.example.hw10.model.Task;
@@ -30,12 +32,13 @@ import java.util.Date;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class DialogFragment extends androidx.fragment.app.DialogFragment {
-    public static final String TAG = "DialogFragment";
+public class DialogAddEditFragment extends androidx.fragment.app.DialogFragment {
+    public static final String TAG = "DialogAddEditFragment";
     public static final String EXTRA_USER_ID = "userId";
     public static final String DATE_PICKER_FRAGMENT_TAG = "DatePicker";
     public static final int REQUEST_CODE_DATE_PICKER = 0;
     public static final int REQUEST_CODE_TIME_PICKER = 1;
+    public static final String TASK_ID = "taskId";
     private static final String TIME_PICKER_FRAGMENT_TAG = "TimePicker";
     private EditText mEditTextName;
     private EditText mEditTextDescription;
@@ -45,17 +48,27 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
     private RadioGroup mRadioGroupState;
     private Repository mRepository;
     private Task mCurrentTask;
-    private Long userId;
+    private Long userId = 0L;
+    private Long taskId = 0L;
 
-    public DialogFragment() {
+    public DialogAddEditFragment() {
         // Required empty public constructor
     }
 
-    public static DialogFragment newInstance(Long userId) {
+    public static DialogAddEditFragment newInstance(Long userId) {
 
         Bundle args = new Bundle();
         args.putLong(EXTRA_USER_ID, userId);
-        DialogFragment fragment = new DialogFragment();
+        DialogAddEditFragment fragment = new DialogAddEditFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static DialogAddEditFragment newInstance(Long taskId, boolean empty) {
+
+        Bundle args = new Bundle();
+        args.putLong(TASK_ID, taskId);
+        DialogAddEditFragment fragment = new DialogAddEditFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -102,8 +115,12 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setStyle(DialogFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
-        userId = getArguments().getLong(EXTRA_USER_ID);
+        // setStyle(DialogAddEditFragment.STYLE_NORMAL, R.style.FullScreenDialogStyle);
+        Bundle bundle = getArguments();
+        if (bundle.containsKey(EXTRA_USER_ID))
+            userId = bundle.getLong(EXTRA_USER_ID);
+        if (bundle.containsKey(TASK_ID))
+            taskId = bundle.getLong(TASK_ID);
         mRepository = Repository.getInstance();
         mCurrentTask = new Task();
     }
@@ -121,12 +138,14 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_dialog, container, false);
         initUi(view);
-
+        if (taskId != 0) {
+            initDefaultValue();
+        }
         mButtonSetTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 TimePickerFragment timePickerFragment = TimePickerFragment.newInstance();
-                timePickerFragment.setTargetFragment(DialogFragment.this, REQUEST_CODE_TIME_PICKER);
+                timePickerFragment.setTargetFragment(DialogAddEditFragment.this, REQUEST_CODE_TIME_PICKER);
                 timePickerFragment.show(getFragmentManager(), TIME_PICKER_FRAGMENT_TAG);
             }
         });
@@ -137,7 +156,7 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
             public void onClick(View view) {
                 DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(new Date());
                 //create parent-child between CrimeDetailFragment and DatePickerFragment
-                datePickerFragment.setTargetFragment(DialogFragment.this, REQUEST_CODE_DATE_PICKER);
+                datePickerFragment.setTargetFragment(DialogAddEditFragment.this, REQUEST_CODE_DATE_PICKER);
 
                 datePickerFragment.show(getFragmentManager(), DATE_PICKER_FRAGMENT_TAG);
             }
@@ -148,7 +167,9 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
             public void onClick(View view) {
                 String taskName = mEditTextName.getText().toString().trim();
                 String taskDescription = mEditTextDescription.getText().toString().trim();
-
+                if (taskId != 0){
+                    mCurrentTask = mRepository.getTask(taskId);
+                }
                 if (!taskName.isEmpty() || mRadioGroupState.getCheckedRadioButtonId() != -1) {
                     mCurrentTask.setMName(taskName);
                     mCurrentTask.setMDescription(taskDescription);
@@ -165,13 +186,40 @@ public class DialogFragment extends androidx.fragment.app.DialogFragment {
                             mCurrentTask.setMState(State.DONE);
                             break;
                     }
-                    mRepository.insertTask(mCurrentTask);
+                    if (userId != 0) {
+                        mRepository.insertTask(mCurrentTask);
+                    } else if (taskId != 0) {
+                        try {
+                            mRepository.updateTask(mCurrentTask);
+                        } catch (TaskNotExistException e) {
+                            Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
                     dismiss();
                 }
             }
         });
 
         return view;
+    }
+
+    private void initDefaultValue() {
+        Task task = mRepository.getTask(taskId);
+        mEditTextName.setText(task.getMName());
+        mEditTextDescription.setText(task.getMDescription());
+        mButtonSetDate.setText(convertTime(task.getMDate(), 0));
+        mButtonSetTime.setText(convertTime(null, task.getMTime()));
+        switch (task.getMState().getI()) {
+            case 0:
+                mRadioGroupState.check(R.id.todo_radio_button);
+                break;
+            case 1:
+                mRadioGroupState.check(R.id.doing_radio_button);
+                break;
+            case 2:
+                mRadioGroupState.check(R.id.done_radio_button);
+                break;
+        }
     }
 
     private void initUi(View view) {

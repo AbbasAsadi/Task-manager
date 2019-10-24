@@ -39,28 +39,28 @@ public class Repository {
                 .unique();
     }
 
-    public User getUser(Long id) {
+    public User getUser(Long userId) {
         return mUserDao.queryBuilder()
-                .where(UserDao.Properties.MId.eq(id))
+                .where(UserDao.Properties.MId.eq(userId))
                 .unique();
     }
 
-    public Task getTask(Long id) {
+    public Task getTask(Long taskId) {
         return mTaskDao.queryBuilder()
-                .where(TaskDao.Properties.MId.eq(id))
+                .where(TaskDao.Properties.MId.eq(taskId))
                 .unique();
 
     }
 
-    public List<Task> getTaskList(Long id) {
+    public List<Task> getTaskList(Long userId) {
         return mTaskDao.queryBuilder()
-                .where(TaskDao.Properties.UserId.eq(id))
+                .where(TaskDao.Properties.UserId.eq(userId))
                 .list();
     }
 
-    public List<Task> getTaskList(Long id, Integer stateValue) {
+    public List<Task> getTaskList(Long userId, Integer stateValue) {
         return mTaskDao.queryBuilder()
-                .where(TaskDao.Properties.UserId.eq(id))
+                .where(TaskDao.Properties.UserId.eq(userId))
                 .where(TaskDao.Properties.MState.eq(stateValue))
                 .list();
     }
@@ -93,9 +93,9 @@ public class Repository {
         mTaskDao.delete(task);
     }
 
-    public void deleteAllTask(Long id) {
+    public void deleteAllTask(Long userId) {
         mTaskDao.queryBuilder()
-                .where(TaskDao.Properties.UserId.eq(id))
+                .where(TaskDao.Properties.UserId.eq(userId))
                 .buildDelete()
                 .executeDeleteWithoutDetachingEntities();
 

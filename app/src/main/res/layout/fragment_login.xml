@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragment_main"
+    android:background="@drawable/login_background"
     android:layoutDirection="ltr"
     tools:context=".controller.fragment.LoginFragment">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login"
+        android:textColor="@color/colorPrimary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guide_line4"/>
 
     <EditText
         android:id="@+id/user_name_edit_text"
@@ -20,7 +32,8 @@
         android:maxLength="20"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:textColor="#000000"
+        android:textColor="#ffffff"
+        android:textColorHint="#ffffff"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guide_line1" />
@@ -37,28 +50,21 @@
         android:maxLength="3"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:textColor="#000000"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="#ffffff"
+        android:textColorHint="#ffffff"        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/guide_line2" />
+
     <CheckBox
         android:id="@+id/checkbox_remember_me"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:checked="true"
         android:text="remember me"
-        app:layout_constraintTop_toBottomOf="@id/password_edit_text"
+        android:textColor="#ffffff"
         app:layout_constraintStart_toStartOf="@id/password_edit_text"
-        android:layout_margin="24dp"/>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guide_line3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintGuide_percent=".60"
-        app:layout_constraintStart_toStartOf="parent" />
-
+        app:layout_constraintTop_toBottomOf="@id/password_edit_text" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_line1"
@@ -66,7 +72,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintGuide_percent=".35"
+        app:layout_constraintGuide_percent="0.50"
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -75,7 +81,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintGuide_percent=".45"
+        app:layout_constraintGuide_percent=".60"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_line3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintGuide_percent=".80"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guide_line4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintGuide_percent=".40"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.button.MaterialButton
@@ -85,6 +109,7 @@
         android:layout_height="wrap_content"
         android:padding="20dp"
         android:text="login"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="25sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

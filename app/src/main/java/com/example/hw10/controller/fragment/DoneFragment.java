@@ -121,7 +121,7 @@ public class DoneFragment extends Fragment implements MyDialogCloseListener {
         mTaskList = mRepository.getTaskList(userId, stateValue);
         if (mTaskAdapter == null) {
             Log.e(TAG, "Task Adapter is null");
-            mTaskAdapter = new TaskAdapter(getActivity(), mTaskList, State.DONE);
+            mTaskAdapter = new TaskAdapter(getContext() , mTaskList, getFragmentManager(), State.DONE);
             mRecyclerViewTask.setAdapter(mTaskAdapter);
 
         } else {

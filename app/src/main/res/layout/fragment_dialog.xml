@@ -8,7 +8,7 @@
     android:layout_gravity="center"
     android:background="#ff7f"
     android:layoutDirection="ltr"
-    tools:context=".controller.fragment.DialogFragment">
+    tools:context=".controller.fragment.DialogAddEditFragment">
 
 
     <ImageView
