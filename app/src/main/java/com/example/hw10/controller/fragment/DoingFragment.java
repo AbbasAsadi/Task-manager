@@ -31,7 +31,6 @@ import com.example.hw10.controller.adapter.TaskAdapter;
 import com.example.hw10.model.Repository;
 import com.example.hw10.model.State;
 import com.example.hw10.model.Task;
-import com.example.hw10.utility.MyDialogCloseListener;
 import com.example.hw10.utility.StateConverter;
 
 import java.util.List;
@@ -46,8 +45,6 @@ public class DoingFragment extends Fragment {
     private static final String TAG = "doingFragment";
     private static int stateValue;
     private Long userId;
-    //private int lastPosition;
-
     private ImageView emptyListIcon;
     private RecyclerView mRecyclerViewTask;
     private TaskAdapter mTaskAdapter;
@@ -125,7 +122,7 @@ public class DoingFragment extends Fragment {
         mTaskList = mRepository.getTaskList(userId, stateValue);
         if (mTaskAdapter == null) {
             Log.e(TAG, "Task Adapter is null");
-            mTaskAdapter = new TaskAdapter(getActivity(), mTaskList,getFragmentManager(), State.DOING);
+            mTaskAdapter = new TaskAdapter(getActivity(), mTaskList, getFragmentManager(), State.DOING);
             mRecyclerViewTask.setAdapter(mTaskAdapter);
 
         } else {

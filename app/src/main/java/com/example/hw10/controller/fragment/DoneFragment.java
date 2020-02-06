@@ -78,18 +78,18 @@ public class DoneFragment extends Fragment implements MyDialogCloseListener {
         userId = getArguments().getLong(USER_ID);
         Log.e("TAG1", "in listFragment userId:#" + userId);
 
-        showSubtitle();
+        //showSubtitle();
         mStateConverter = new StateConverter();
         stateValue = mStateConverter.convertToDatabaseValue(State.DONE);
         mTaskList = mRepository.getTaskList(userId, stateValue);
     }
 
-    private void showSubtitle() {
+    /*private void showSubtitle() {
         String subtitleMessage = "Hi " + mRepository.getUser(userId).getMUserName();
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         activity.getSupportActionBar().setSubtitle(subtitleMessage);
 
-    }
+    }*/
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

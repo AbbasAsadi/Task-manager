@@ -45,6 +45,7 @@ public class DialogAddEditFragment extends androidx.fragment.app.DialogFragment 
     private MaterialButton mButtonSetDate;
     private MaterialButton mButtonSetTime;
     private MaterialButton mButtonDone;
+    private MaterialButton mButtonCancel;
     private RadioGroup mRadioGroupState;
     private Repository mRepository;
     private Task mCurrentTask;
@@ -162,6 +163,13 @@ public class DialogAddEditFragment extends androidx.fragment.app.DialogFragment 
             }
         });
 
+        mButtonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
+
         mButtonDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -228,6 +236,7 @@ public class DialogAddEditFragment extends androidx.fragment.app.DialogFragment 
         mButtonSetDate = view.findViewById(R.id.set_date_button);
         mButtonSetTime = view.findViewById(R.id.set_time_button);
         mButtonDone = view.findViewById(R.id.done_button);
+        mButtonCancel = view.findViewById(R.id.cancel_button);
         mRadioGroupState = view.findViewById(R.id.radio_group_dialog);
     }
 
